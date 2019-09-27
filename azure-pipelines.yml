@@ -1,27 +1,38 @@
-trigger:
-- master
+- stage: Deploy
+  displayName: Deploy stage
+  dependsOn: Build
+  jobs:
+  - deployment: Deploy
+    displayName: Deploy job
+    pool:
+      vmImage: $(vmImageName)
+    environment: 'shashankbarsinpipelinesjavascriptdocker.aksnamespace'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: DownloadPipelineArtifact@2
+            inputs:
+              artifactName: 'manifests'
+              downloadPath: '$(System.ArtifactsDirectory)/manifests'
 
-strategy:
-  matrix:
-    jdk10_linux:
-      imageName: "ubuntu-16.04"
-      jdk_version: "1.10"
-    jdk11_windows:
-      imageName: "vs2017-win2016"
-      jdk_version: "1.11"
-  maxParallel: 2
-
-pool:
-  vmImage: $(imageName)
-
-steps:
-  - task: Maven@3
-    inputs:
-      mavenPomFile: "pom.xml"
-      mavenOptions: "-Xmx3072m"
-      javaHomeOption: "JDKVersion"
-      jdkVersionOption: $(jdk_version)
-      jdkArchitectureOption: "x64"
-      publishJUnitResults: true
-      testResultsFiles: "**/TEST-*.xml"
-      goals: "package"
+          - task: KubernetesManifest@0
+            displayName: Create imagePullSecret
+            inputs:
+              action: createSecret
+              secretName: $(imagePullSecret)
+              namespace: $(k8sNamespace)
+              dockerRegistryEndpoint: $(dockerRegistryServiceConnection)
+              
+          - task: KubernetesManifest@0
+            displayName: Deploy to Kubernetes cluster
+            inputs:
+              action: deploy
+              namespace: $(k8sNamespace)
+              manifests: |
+                $(System.ArtifactsDirectory)/manifests/deployment.yml
+                $(System.ArtifactsDirectory)/manifests/service.yml
+              imagePullSecrets: |
+                $(imagePullSecret)
+              containers: |
+                $(containerRegistry)/$(imageRepository):$(tag)
