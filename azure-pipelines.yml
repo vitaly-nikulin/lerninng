@@ -1,11 +1,12 @@
-- task: Kubernetes@1
-  inputs:
-    connectionType: 'Azure Resource Manager'
-    azureSubscriptionEndpoint: 'Pay-As-You-Go(c111fc5c-4883-4711-ab39-3a82d9fdc483)'
-    azureResourceGroup: 'myapp-rg'
-    kubernetesCluster: 'myepamapp'
-    command: 
-    secretType: 'dockerRegistry'
-    containerRegistryType: 'Azure Container Registry'
-    azureSubscriptionEndpointForSecrets: 'Pay-As-You-Go(c111fc5c-4883-4711-ab39-3a82d9fdc483)'
-    azureContainerRegistry: 'vnilulinregistry.azurecr.io'
+steps:
+  - task: Kubernetes@1
+    inputs:
+      connectionType: 'Azure Resource Manager'
+      azureSubscriptionEndpoint: 'Pay-As-You-Go(c111fc5c-4883-4711-ab39-3a82d9fdc483)'
+      azureResourceGroup: 'myapp-rg'
+      kubernetesCluster: 'myepamapp'
+      command: 
+      secretType: 'dockerRegistry'
+      containerRegistryType: 'Azure Container Registry'
+      azureSubscriptionEndpointForSecrets: 'Pay-As-You-Go(c111fc5c-4883-4711-ab39-3a82d9fdc483)'
+      azureContainerRegistry: 'vnilulinregistry.azurecr.io'
